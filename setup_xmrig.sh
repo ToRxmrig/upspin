@@ -58,26 +58,37 @@ usage_example() {
 
 # Flag Processing Function
 flags() {
+  # Check for help flags
   ([ "$1" = "-h" ] || [ "$1" = "h" ]) && usage_example
   ([ "$2" = "-h" ] || [ "$2" = "h" ]) && usage_example
   ([ "$3" = "-h" ] || [ "$3" = "h" ]) && usage_example
   ([ "$4" = "-h" ] || [ "$4" = "h" ]) && usage_example
 
-  ([ "$1" = "d" ] || [ "$1" = "-d" ]) && DEBUG=1
-  ([ "$2" = "d" ] || [ "$2" = "-d" ]) && DEBUG=1
-  ([ "$3" = "d" ] || [ "$3" = "-d" ]) && DEBUG=1
+  # Check for debug flags
+  ([ "$1" = "-d" ] || [ "$1" = "d" ]) && DEBUG=1
+  ([ "$2" = "-d" ] || [ "$2" = "d" ]) && DEBUG=1
+  ([ "$3" = "-d" ] || [ "$3" = "d" ]) && DEBUG=1
 
+  # Check for static flags
   ([ "$1" = "-s" ] || [ "$1" = "s" ]) && STATIC=1
   ([ "$2" = "-s" ] || [ "$2" = "s" ]) && STATIC=1
   ([ "$3" = "-s" ] || [ "$3" = "s" ]) && STATIC=1
 
-  ([ "$1" = "7" ] || [ "$1" = "-7" ]) && BUILD=7
-  ([ "$2" = "7" ] || [ "$2" = "-7" ]) && BUILD=7
-  ([ "$3" = "7" ] || [ "$3" = "-7" ]) && BUILD=7
+  # Check for build version 7
+  ([ "$1" = "-7" ] || [ "$1" = "7" ]) && BUILD=7
+  ([ "$2" = "-7" ] || [ "$2" = "7" ]) && BUILD=7
+  ([ "$3" = "-7" ] || [ "$3" = "7" ]) && BUILD=7
 
-  ([ "$1" = "8" ] || [ "$1" = "-8" ]) && BUILD=8
-  ([ "$2" = "8" ] || [ "$2" = "-8" ]) && BUILD=8
-  ([ "$3" = "8" ] || [ "$3" = "-8" ]) && BUILD=8
+  # Check for build version 8
+  ([ "$1" = "-8" ] || [ "$1" = "8" ]) && BUILD=8
+  ([ "$2" = "-8" ] || [ "$2" = "8" ]) && BUILD=8
+  ([ "$3" = "-8" ] || [ "$3" = "8" ]) && BUILD=8
+
+  # Check for CUDA flag
+  ([ "$1" = "-cuda" ] || [ "$1" = "cuda" ]) && BUILD=cuda
+  ([ "$2" = "-cuda" ] || [ "$2" = "cuda" ]) && BUILD=cuda
+  ([ "$3" = "-cuda" ] || [ "$3" = "cuda" ]) && BUILD=cuda
+  ([ "$4" = "-cuda" ] || [ "$4" = "cuda" ]) && BUILD=cuda
 }
 
 # Script Update Function
