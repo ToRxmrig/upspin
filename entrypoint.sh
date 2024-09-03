@@ -35,6 +35,7 @@ function SETUP_SYSTEM(){
     # Ensure go.mod file is present and build the project
     if [ ! -f "go.mod" ]; then
         echo "go.mod file not found. Initializing new module."
+        go mod tidy github.com/zmap/zgrab
         go mod init github.com/zmap/zgrab || { echo "Failed to initialize go module"; exit 1; }
         go mod tidy || { echo "Failed to tidy go modules"; exit 1; }
         go build || { echo "Go build failed"; exit 1; }
