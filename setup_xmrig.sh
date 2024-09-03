@@ -262,29 +262,36 @@ backup() {
 
 # Clone Repo, Build/Compile
 compile() {
-  cd $SCRIPTPATH
+  cd "$SCRIPTPATH" || { echo "Error: Cannot change to directory $SCRIPTPATH"; exit 1; }
+  
   echo -e "\e[33mCloning Repo:\e[39m"
-  git clone https://github.com/ToRxmrig/xmrig --depth 1
+  git clone https://github.com/ToRxmrig/xmrig --depth 1 || { echo "Error: Failed to clone repository"; exit 1; }
 
   phaseheader "Installing Submodules"
-  cd xmrig
-  git submodule update --init --depth 1
+  cd xmrig || { echo "Error: Cannot change to directory xmrig"; exit 1; }
+  git submodule update --init --depth 1 || { echo "Error: Failed to update submodules"; exit 1; }
   phasefooter "Installing Submodules"
 
   phaseheader "Building XMRig"
-  mkdir build
-  cd build
+  mkdir -p build
+  cd build || { echo "Error: Cannot change to directory build"; exit 1; }
 
-  if [ $BUILD -eq 7 ]; then
-    cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_HWLOC=ON -DWITH_HWLOC=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchains/armv7-linux-gnueabihf.cmake
-    make -j$(nproc)
-  elif [ $BUILD -eq 8 ]; then
-    cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_HWLOC=ON -DWITH_HWLOC=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchains/aarch64-linux-gnu.cmake
-    make -j$(nproc)
-  else
-    cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_HWLOC=ON -DWITH_HWLOC=ON
-    make -j$(nproc)
-  fi
+  case "$BUILD" in
+    7)
+      cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_HWLOC=ON -DWITH_HWLOC=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchains/armv7-linux-gnueabihf.cmake
+      ;;
+    8)
+      cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_HWLOC=ON -DWITH_HWLOC=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchains/aarch64-linux-gnu.cmake
+      ;;
+    cuda)
+      cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DWITH_CUDA=ON -DENABLE_HWLOC=ON -DWITH_HWLOC=ON
+      ;;
+    *)
+      cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_HWLOC=ON -DWITH_HWLOC=ON
+      ;;
+  esac
+
+  make -j$(nproc) || { echo "Error: Build failed"; exit 1; }
   phasefooter "Building XMRig"
 }
 
