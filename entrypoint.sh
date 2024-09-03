@@ -32,16 +32,17 @@ function SETUP_SYSTEM(){
         cd "$GOPATH/src/github.com/zmap/zgrab" || { echo "Failed to change directory"; exit 1; }
     fi
 
-    # Ensure go.mod file is present and build the project
+    # Initialize and tidy Go module
     if [ ! -f "go.mod" ]; then
         echo "go.mod file not found. Initializing new module."
-        go mod tidy github.com/zmap/zgrab
         go mod init github.com/zmap/zgrab || { echo "Failed to initialize go module"; exit 1; }
-        go mod tidy || { echo "Failed to tidy go modules"; exit 1; }
-        go build || { echo "Go build failed"; exit 1; }
-        go install github.com/zmap/zgrab@latest || { echo "Failed to install zgrab"; exit 1; }
-        cp ./zgrab /usr/bin/zgrab || { echo "Failed to copy zgrab"; exit 1; }
     fi
+
+    # Tidy go modules and build the project
+    go mod tidy || { echo "Failed to tidy go modules"; exit 1; }
+    go build || { echo "Go build failed"; exit 1; }
+    go install github.com/zmap/zgrab@latest || { echo "Failed to install zgrab"; exit 1; }
+    cp ./zgrab /usr/bin/zgrab || { echo "Failed to copy zgrab"; exit 1; }
 
     # Clean APK cache
     rm -rf /var/cache/apk/*
