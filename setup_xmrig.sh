@@ -85,7 +85,7 @@ self_update() {
   echo -e "\e[33mStatus:\e[39m"
   cd "$SCRIPTPATH"
   timeout 1s git fetch --quiet
-  timeout 1s git diff --quiet --exit-code "origin/$BRANCH" "$SCRIPTFILE"
+  timeout 1s git diff --quiet --exit-code "origin/master" "$SCRIPTFILE"
   [ $? -eq 1 ] && {
     echo -e "\e[31m  ✗ Version: Mismatched.\e[39m"
     echo
