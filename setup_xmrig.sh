@@ -83,32 +83,75 @@ flags() {
 # Script Update Function
 self_update() {
   echo -e "\e[33mStatus:\e[39m"
-  cd "$SCRIPTPATH"
+
+  # Ensure we are in the script directory
+  cd "$SCRIPTPATH" || { echo "Error: Cannot change to directory $SCRIPTPATH"; exit 1; }
+
+  # Check if the directory is a Git repository
+  if [ ! -d ".git" ]; then
+    echo -e "\e[31mError: Not a Git repository.\e[39m"
+    return 1
+  fi
+
+  # Fetch updates from the remote repository
   timeout 1s git fetch --quiet
+  if [ $? -ne 0 ]; then
+    echo -e "\e[31mError: Failed to fetch updates.\e[39m"
+    return 1
+  fi
+
+  # Check if there are differences between the local file and the remote branch
   timeout 1s git diff --quiet --exit-code "origin/master" "$SCRIPTFILE"
-  [ $? -eq 1 ] && {
+  if [ $? -ne 0 ]; then
     echo -e "\e[31m  ✗ Version: Mismatched.\e[39m"
     echo
+
+    # Fetch update
     echo -e "\e[33mFetching Update:\e[39m"
-    if [ -n "$(git status --porcelain)" ];  # opposite is -z
-    then
+    if [ -n "$(git status --porcelain)" ]; then
+      echo -e "\e[33mStashing local changes...\e[39m"
       git stash push -m 'local changes stashed before self update' --quiet
+      if [ $? -ne 0 ]; then
+        echo -e "\e[31mError: Failed to stash local changes.\e[39m"
+        return 1
+      fi
     fi
+
     git pull --force --quiet
-    git checkout $BRANCH --quiet
+    if [ $? -ne 0 ]; then
+      echo -e "\e[31mError: Failed to pull updates.\e[39m"
+      return 1
+    fi
+
+    # Checkout to the specified branch
+    git checkout "$BRANCH" --quiet
+    if [ $? -ne 0 ]; then
+      echo -e "\e[31mError: Failed to checkout branch $BRANCH.\e[39m"
+      return 1
+    fi
+
+    # Pull latest changes for the branch
     git pull --force --quiet
+    if [ $? -ne 0 ]; then
+      echo -e "\e[31mError: Failed to pull updates for branch $BRANCH.\e[39m"
+      return 1
+    fi
+
     echo -e "\e[33m  ✓ Update: Complete.\e[39m"
     echo
     echo -e "\e[33mLaunching New Version. Standby...\e[39m"
     sleep 3
-    cd - > /dev/null  # return to original working dir
-    exec "$SCRIPTNAME" "${ARGS[@]}"
 
-    # Now exit this old instance
+    # Return to the original working directory and execute the script
+    cd - > /dev/null || { echo "Error: Cannot return to the original directory"; exit 1; }
+    exec "$SCRIPTNAME" "${ARGS[@]}"
+    
+    # Exit the old instance
     exit 1
-    }
-  echo -e "\e[33m  ✓ Version: Current.\e[39m"
-  echo
+  else
+    echo -e "\e[33m  ✓ Version: Current.\e[39m"
+    echo
+  fi
 }
 
 # Package Check/Install Function
