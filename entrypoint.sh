@@ -8,6 +8,8 @@ export PATH=$PATH:$GOPATH/bin
 RATESCAN="50000"
 SETUP_SLEEP="1"
 
+mkdir -p /root/go/src/github.com/zmap
+
 function SETUP_SYSTEM(){
     apk update || { echo "APK update failed"; exit 1; }
     apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing hwloc-dev || { echo "Failed to install hwloc-dev"; exit 1; }
@@ -19,8 +21,8 @@ function SETUP_SYSTEM(){
         sleep "$SETUP_SLEEP"
     done
 
-    if [ -d "/root/go/src/github.com/zmap/zgrab" ]; then
-        cd /root/go/src/github.com/zmap/zgrab || { echo "Failed to change directory"; exit 1; }
+    if [ -d "/root/go/src/github.com/zmap" ]; then
+        cd /root/go/src/github.com/zmap || { echo "Failed to change directory"; exit 1; }
     else
         echo "Directory /root/go/src/github.com/zmap/zgrab does not exist."
         exit 1
