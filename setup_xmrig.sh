@@ -3,7 +3,7 @@
 VERS="v2.0"
 
 # Required Packages for Debian/Ubuntu
-DebianPackages=('build-essential' 'upx' 'cmake' 'libuv1-dev' 'libssl-dev' 'libhwloc-dev' 'screen' 'p7zip-full')
+DebianPackages=('build-essential' 'upx-ucl' 'cmake' 'libuv1-dev' 'libssl-dev' 'libhwloc-dev' 'screen' 'p7zip-full')
 
 # Required Packages for Alpine
 AlpinePackages=('build-base' 'cmake' 'libuv-dev' 'openssl-dev' 'hwloc-dev' 'screen' 'p7zip')
