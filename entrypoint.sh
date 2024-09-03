@@ -8,8 +8,8 @@ RATESCAN="50000"
 SETUP_SLEEP="1"
 
 function INIT_MAIN(){
-    SETUP_SYSTEM
     SETUP_BASICS
+    SETUP_SYSTEM
     SETUP_JQ
     SETUP_ZMAP
     SETUP_ZGRAB
@@ -25,7 +25,7 @@ function SETUP_SYSTEM(){
 
 function SETUP_BASICS(){
     apk update
-    apk add bash curl wget vim docker make upx
+    apk add bash upx-ucl build-base p7zip screen curl wget vim docker make
     service docker start || { echo "Failed to start Docker"; exit 1; }
 }
 
