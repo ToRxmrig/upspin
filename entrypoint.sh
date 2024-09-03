@@ -21,7 +21,7 @@ function SETUP_SYSTEM(){
     done
     
     mkdir -p /root/go/src/github.com/zmap/zgrab
-    go get github.com/zmap/zgrab
+    go install github.com/zmap/zgrab@latest
     cd /root/go/src/github.com/zmap/zgrab
     go build
     cp ./zgrab /usr/bin/zgrab
