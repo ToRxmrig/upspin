@@ -19,9 +19,18 @@ function SETUP_SYSTEM(){
     done
 
     export GOPATH=/root/go
-    go install github.com/zmap/zgrab@latest
-    cd /root/go/src/github.com/zmap/zgrab
+    git clone https://github.com/zmap/zmap /tmp/zmap
+    cd /tmp/zmap
+    cmake .
+    make -j4
+
+    git clone https://github.com/zmap/zgrab /tmp/zgrab
+    cd /tmp/zgrab
+    go mod init github.com/zmap/zgrab
+    go mod tidy
     go build
+    go mod vendor
+    make
     cp ./zgrab /usr/bin/zgrab
     rm -rf /var/cache/apk/*
     /usr/local/bin/setup_xmrig.sh
