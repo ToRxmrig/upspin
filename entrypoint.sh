@@ -48,7 +48,6 @@ SETUP_BASICS() {
         libunistring-dev \
         judy-dev \
         bash \
-        upx-ucl \
         build-base \
         p7zip \
         screen \
