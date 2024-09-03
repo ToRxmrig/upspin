@@ -237,6 +237,7 @@ inoutheader() {
 
   [ $BUILD -eq 7 ] && echo -ne "\e[33m for ARMv7\e[39m" && [ $STATIC -eq 1 ] && echo -e "\e[33m (static)\e[39m"
   [ $BUILD -eq 8 ] && echo -ne "\e[33m for ARMv8\e[39m" && [ $STATIC -eq 1 ] && echo -e "\e[33m (static)\e[39m"
+  [ "$BUILD" = "cuda" ] && echo -ne "\e[33m with CUDA Support\e[39m" && [ $STATIC -eq 1 ] && echo -e "\e[33m (static)\e[39m"
   [ $BUILD -eq 0 ] && echo -ne "\e[33m for x86-64\e[39m" && [ $STATIC -eq 1 ] && echo -e "\e[33m (static)\e[39m"
   echo
 
