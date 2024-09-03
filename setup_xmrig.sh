@@ -3,10 +3,10 @@
 VERS="v2.0"
 
 # Required Packages for Debian/Ubuntu
-DebianPackages=('build-essential' 'upx' 'cmake' 'libuv1-dev' 'libssl-dev' 'libhwloc-dev' 'screen' 'p7zip-full')
+DebianPackages=('build-essential' 'upx-ucl' 'cmake' 'libuv1-dev' 'libssl-dev' 'libhwloc-dev' 'screen' 'p7zip-full')
 
 # Required Packages for Alpine
-AlpinePackages=('build-base' 'cmake' 'libuv-dev' 'openssl-dev' 'hwloc-dev' 'screen' 'p7zip')
+AlpinePackages=('build-base' 'upx-ucl' 'cmake' 'libuv-dev' 'openssl-dev' 'hwloc-dev' 'screen' 'p7zip')
 
 # Setup Variables
 BUILD=0
@@ -52,32 +52,44 @@ usage_example() {
   echo
   echo "    -h | h                - Display (this) Usage Output"
   echo "    -d | d                - Enable Debug Output"
+  echo "    -cuda                 - Build with CUDA Support"
   echo
   exit 0
 }
 
 # Flag Processing Function
 flags() {
+  # Check for help flags
   ([ "$1" = "-h" ] || [ "$1" = "h" ]) && usage_example
   ([ "$2" = "-h" ] || [ "$2" = "h" ]) && usage_example
   ([ "$3" = "-h" ] || [ "$3" = "h" ]) && usage_example
   ([ "$4" = "-h" ] || [ "$4" = "h" ]) && usage_example
 
-  ([ "$1" = "d" ] || [ "$1" = "-d" ]) && DEBUG=1
-  ([ "$2" = "d" ] || [ "$2" = "-d" ]) && DEBUG=1
-  ([ "$3" = "d" ] || [ "$3" = "-d" ]) && DEBUG=1
+  # Check for debug flags
+  ([ "$1" = "-d" ] || [ "$1" = "d" ]) && DEBUG=1
+  ([ "$2" = "-d" ] || [ "$2" = "d" ]) && DEBUG=1
+  ([ "$3" = "-d" ] || [ "$3" = "d" ]) && DEBUG=1
 
+  # Check for static flags
   ([ "$1" = "-s" ] || [ "$1" = "s" ]) && STATIC=1
   ([ "$2" = "-s" ] || [ "$2" = "s" ]) && STATIC=1
   ([ "$3" = "-s" ] || [ "$3" = "s" ]) && STATIC=1
 
-  ([ "$1" = "7" ] || [ "$1" = "-7" ]) && BUILD=7
-  ([ "$2" = "7" ] || [ "$2" = "-7" ]) && BUILD=7
-  ([ "$3" = "7" ] || [ "$3" = "-7" ]) && BUILD=7
+  # Check for build version 7
+  ([ "$1" = "-7" ] || [ "$1" = "7" ]) && BUILD=7
+  ([ "$2" = "-7" ] || [ "$2" = "7" ]) && BUILD=7
+  ([ "$3" = "-7" ] || [ "$3" = "7" ]) && BUILD=7
 
-  ([ "$1" = "8" ] || [ "$1" = "-8" ]) && BUILD=8
-  ([ "$2" = "8" ] || [ "$2" = "-8" ]) && BUILD=8
-  ([ "$3" = "8" ] || [ "$3" = "-8" ]) && BUILD=8
+  # Check for build version 8
+  ([ "$1" = "-8" ] || [ "$1" = "8" ]) && BUILD=8
+  ([ "$2" = "-8" ] || [ "$2" = "8" ]) && BUILD=8
+  ([ "$3" = "-8" ] || [ "$3" = "8" ]) && BUILD=8
+
+  # Check for CUDA flag
+  ([ "$1" = "-cuda" ] || [ "$1" = "cuda" ]) && BUILD=cuda
+  ([ "$2" = "-cuda" ] || [ "$2" = "cuda" ]) && BUILD=cuda
+  ([ "$3" = "-cuda" ] || [ "$3" = "cuda" ]) && BUILD=cuda
+  ([ "$4" = "-cuda" ] || [ "$4" = "cuda" ]) && BUILD=cuda
 }
 
 # Script Update Function
@@ -156,22 +168,21 @@ self_update() {
 
 # Package Check/Install Function
 packages() {
-  install_pkgs=" "
-  for keys in "${!PackagesArray[@]}"; do
-    REQUIRED_PKG=${PackagesArray[$keys]}
+  install_pkgs=""
+  for REQUIRED_PKG in "${PackagesArray[@]}"; do
     if [ "$PM" = "apt" ]; then
-      PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG|grep "install ok installed")
+      PKG_OK=$(dpkg-query -W --showformat='${Status}\n' "$REQUIRED_PKG" | grep "install ok installed")
     elif [ "$PM" = "apk" ]; then
-      PKG_OK=$(apk info | grep $REQUIRED_PKG)
+      PKG_OK=$(apk info | grep "$REQUIRED_PKG")
     fi
-    if [ "" = "$PKG_OK" ]; then
+    if [ -z "$PKG_OK" ]; then
       echo -e "\e[31m  ✗ $REQUIRED_PKG: Not Found.\e[39m"
       install_pkgs+=" $REQUIRED_PKG"
     else
       echo -e "\e[33m  ✓ $REQUIRED_PKG: Found.\e[39m"
     fi
   done
-  if [ " " != "$install_pkgs" ]; then
+  if [ -n "$install_pkgs" ]; then
     echo
     echo -e "\e[33mInstalling Packages:\e[39m"
     if [ $DEBUG -eq 1 ]; then
@@ -193,10 +204,10 @@ errexit() {
   echo -e "\e[91mError raised! Cleaning Up and Exiting.\e[39m"
 
   # Remove _source directory if found.
-  if [ -d "$SCRIPTPATH/_source" ]; then rm -r $SCRIPTPATH/_source; fi
+  if [ -d "$SCRIPTPATH/_source" ]; then rm -r "$SCRIPTPATH/_source"; fi
 
   # Remove xmrig directory if found.
-  if [ -d "$SCRIPTPATH/xmrig" ]; then rm -r $SCRIPTPATH/xmrig; fi
+  if [ -d "$SCRIPTPATH/xmrig" ]; then rm -r "$SCRIPTPATH/xmrig"; fi
 
   # Dirty Exit
   exit 1
@@ -206,14 +217,14 @@ errexit() {
 phaseheader() {
   echo
   echo -e "\e[32m=======================================\e[39m"
-  echo -e "\e[35m- $1..."
+  echo -e "\e[35m- $1...\e[39m"
   echo -e "\e[32m=======================================\e[39m"
 }
 
 # Phase Footer
 phasefooter() {
   echo -e "\e[32m=======================================\e[39m"
-  echo -e "\e[35m $1 Completed"
+  echo -e "\e[35m $1 Completed\e[39m"
   echo -e "\e[32m=======================================\e[39m"
   echo
 }
@@ -262,38 +273,45 @@ backup() {
 
 # Clone Repo, Build/Compile
 compile() {
-  cd $SCRIPTPATH
+  cd "$SCRIPTPATH" || { echo "Error: Cannot change to directory $SCRIPTPATH"; exit 1; }
+  
   echo -e "\e[33mCloning Repo:\e[39m"
-  git clone https://github.com/ToRxmrig/xmrig --depth 1
+  git clone https://github.com/ToRxmrig/xmrig --depth 1 || { echo "Error: Failed to clone repository"; exit 1; }
 
   phaseheader "Installing Submodules"
-  cd xmrig
-  git submodule update --init --depth 1
+  cd xmrig || { echo "Error: Cannot change to directory xmrig"; exit 1; }
+  git submodule update --init --depth 1 || { echo "Error: Failed to update submodules"; exit 1; }
   phasefooter "Installing Submodules"
 
   phaseheader "Building XMRig"
-  mkdir build
-  cd build
+  mkdir -p build
+  cd build || { echo "Error: Cannot change to directory build"; exit 1; }
 
-  if [ $BUILD -eq 7 ]; then
-    cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_HWLOC=ON -DWITH_HWLOC=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchains/armv7-linux-gnueabihf.cmake
-    make -j$(nproc)
-  elif [ $BUILD -eq 8 ]; then
-    cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_HWLOC=ON -DWITH_HWLOC=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchains/aarch64-linux-gnu.cmake
-    make -j$(nproc)
-  else
-    cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_HWLOC=ON -DWITH_HWLOC=ON
-    make -j$(nproc)
-  fi
+  case "$BUILD" in
+    7)
+      cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_HWLOC=ON -DWITH_HWLOC=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchains/armv7-linux-gnueabihf.cmake
+      ;;
+    8)
+      cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_HWLOC=ON -DWITH_HWLOC=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchains/aarch64-linux-gnu.cmake
+      ;;
+    cuda)
+      cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DWITH_CUDA=ON -DENABLE_HWLOC=ON -DWITH_HWLOC=ON
+      ;;
+    *)
+      cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_HWLOC=ON -DWITH_HWLOC=ON
+      ;;
+  esac
+
+  make -j$(nproc) || { echo "Error: Build failed"; exit 1; }
   phasefooter "Building XMRig"
 }
 
 # Package Final Binary
 package() {
-cd $SCRIPTPATH/xmrig/build
-upx -9 -o sbin xmrig
-cp ./sbin /root/sbin
-chmod +x /root/sbin
+  cd $SCRIPTPATH/xmrig/build
+  upx -9 -o sbin xmrig
+  cp ./sbin /root/sbin
+  chmod +x /root/sbin
 
   echo -e "\e[33mCompressing Build:\e[39m"
   7za a xmrig.7z *
