@@ -85,10 +85,10 @@ flags() {
   ([ "$3" = "-8" ] || [ "$3" = "8" ]) && BUILD=8
 
   # Check for CUDA flag
-  ([ "$1" = "-cuda" ] || [ "$1" = "cuda" ]) && BUILD=cuda
-  ([ "$2" = "-cuda" ] || [ "$2" = "cuda" ]) && BUILD=cuda
-  ([ "$3" = "-cuda" ] || [ "$3" = "cuda" ]) && BUILD=cuda
-  ([ "$4" = "-cuda" ] || [ "$4" = "cuda" ]) && BUILD=cuda
+  ([ "$1" = "-9" ] || [ "$1" = "9" ]) && BUILD=9
+  ([ "$2" = "-9" ] || [ "$2" = "9" ]) && BUILD=9
+  ([ "$3" = "-9" ] || [ "$3" = "9" ]) && BUILD=9
+  ([ "$4" = "-9" ] || [ "$4" = "9" ]) && BUILD=9
 }
 
 # Script Update Function
@@ -294,7 +294,7 @@ compile() {
     8)
       cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_HWLOC=ON -DWITH_HWLOC=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchains/aarch64-linux-gnu.cmake
       ;;
-    cuda)
+    9)
       cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DWITH_CUDA=ON -DENABLE_HWLOC=ON -DWITH_HWLOC=ON
       ;;
     *)
