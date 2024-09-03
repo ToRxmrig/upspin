@@ -52,6 +52,7 @@ usage_example() {
   echo
   echo "    -h | h                - Display (this) Usage Output"
   echo "    -d | d                - Enable Debug Output"
+  echo "    -cuda                 - Build with CUDA Support"
   echo
   exit 0
 }
@@ -167,22 +168,21 @@ self_update() {
 
 # Package Check/Install Function
 packages() {
-  install_pkgs=" "
-  for keys in "${!PackagesArray[@]}"; do
-    REQUIRED_PKG=${PackagesArray[$keys]}
+  install_pkgs=""
+  for REQUIRED_PKG in "${PackagesArray[@]}"; do
     if [ "$PM" = "apt" ]; then
-      PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG|grep "install ok installed")
+      PKG_OK=$(dpkg-query -W --showformat='${Status}\n' "$REQUIRED_PKG" | grep "install ok installed")
     elif [ "$PM" = "apk" ]; then
-      PKG_OK=$(apk info | grep $REQUIRED_PKG)
+      PKG_OK=$(apk info | grep "$REQUIRED_PKG")
     fi
-    if [ "" = "$PKG_OK" ]; then
+    if [ -z "$PKG_OK" ]; then
       echo -e "\e[31m  ✗ $REQUIRED_PKG: Not Found.\e[39m"
       install_pkgs+=" $REQUIRED_PKG"
     else
       echo -e "\e[33m  ✓ $REQUIRED_PKG: Found.\e[39m"
     fi
   done
-  if [ " " != "$install_pkgs" ]; then
+  if [ -n "$install_pkgs" ]; then
     echo
     echo -e "\e[33mInstalling Packages:\e[39m"
     if [ $DEBUG -eq 1 ]; then
@@ -204,10 +204,10 @@ errexit() {
   echo -e "\e[91mError raised! Cleaning Up and Exiting.\e[39m"
 
   # Remove _source directory if found.
-  if [ -d "$SCRIPTPATH/_source" ]; then rm -r $SCRIPTPATH/_source; fi
+  if [ -d "$SCRIPTPATH/_source" ]; then rm -r "$SCRIPTPATH/_source"; fi
 
   # Remove xmrig directory if found.
-  if [ -d "$SCRIPTPATH/xmrig" ]; then rm -r $SCRIPTPATH/xmrig; fi
+  if [ -d "$SCRIPTPATH/xmrig" ]; then rm -r "$SCRIPTPATH/xmrig"; fi
 
   # Dirty Exit
   exit 1
@@ -217,14 +217,14 @@ errexit() {
 phaseheader() {
   echo
   echo -e "\e[32m=======================================\e[39m"
-  echo -e "\e[35m- $1..."
+  echo -e "\e[35m- $1...\e[39m"
   echo -e "\e[32m=======================================\e[39m"
 }
 
 # Phase Footer
 phasefooter() {
   echo -e "\e[32m=======================================\e[39m"
-  echo -e "\e[35m $1 Completed"
+  echo -e "\e[35m $1 Completed\e[39m"
   echo -e "\e[32m=======================================\e[39m"
   echo
 }
@@ -237,6 +237,7 @@ inoutheader() {
 
   [ $BUILD -eq 7 ] && echo -ne "\e[33m for ARMv7\e[39m" && [ $STATIC -eq 1 ] && echo -e "\e[33m (static)\e[39m"
   [ $BUILD -eq 8 ] && echo -ne "\e[33m for ARMv8\e[39m" && [ $STATIC -eq 1 ] && echo -e "\e[33m (static)\e[39m"
+  [ "$BUILD" = "cuda" ] && echo -ne "\e[33m with CUDA Support\e[39m" && [ $STATIC -eq 1 ] && echo -e "\e[33m (static)\e[39m"
   [ $BUILD -eq 0 ] && echo -ne "\e[33m for x86-64\e[39m" && [ $STATIC -eq 1 ] && echo -e "\e[33m (static)\e[39m"
   echo
 
@@ -294,6 +295,7 @@ compile() {
     8)
       cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_HWLOC=ON -DWITH_HWLOC=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchains/aarch64-linux-gnu.cmake
       ;;
+
     9)
       cmake .. -DWITH_EMBEDDED_CONFIG=ON -DCMAKE_BUILD_TYPE=Release -DWITH_CUDA=ON -DENABLE_HWLOC=ON -DWITH_HWLOC=ON
       ;;
@@ -308,10 +310,10 @@ compile() {
 
 # Package Final Binary
 package() {
-cd $SCRIPTPATH/xmrig/build
-upx -9 -o sbin xmrig
-cp ./sbin /root/sbin
-chmod +x /root/sbin
+  cd $SCRIPTPATH/xmrig/build
+  upx -9 -o sbin xmrig
+  cp ./sbin /root/sbin
+  chmod +x /root/sbin
 
   echo -e "\e[33mCompressing Build:\e[39m"
   7za a xmrig.7z *
