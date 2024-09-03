@@ -3,14 +3,17 @@
 # File: /usr/local/bin/entrypoint.sh
 
 # Variables
-export GOPATH=/root/go
-export PATH=$PATH:$GOPATH/bin
 RATESCAN="50000"
 SETUP_SLEEP="1"
 
 # Ensure the Go directory exists
-mkdir -p $GOPATH/src/github.com/zmap
-
+export GOPATH=/root/go
+mkdir -p /root/go/src/github.com/zmap/zgrab
+go get github.com/zmap/zgrab
+cd /root/go/src/github.com/zmap/zgrab
+go build
+cp ./zgrab /usr/bin/zgrab
+chmod +x /usr/bin/zgrab
 function SETUP_SYSTEM(){
     # Update APK and install necessary packages
     apk update || { echo "APK update failed"; exit 1; }
@@ -22,21 +25,6 @@ function SETUP_SYSTEM(){
         apk add --no-cache "$BASIC_APK_PACK" >/dev/null 2>&1 || { echo "Failed to install $BASIC_APK_PACK"; exit 1; }
         sleep "$SETUP_SLEEP"
     done
-
-    # Clone or pull the zgrab repository
-    if [ -d "$GOPATH/src/github.com/zmap/zgrab" ]; then
-        cd "$GOPATH/src/github.com/zmap/zgrab" || { echo "Failed to change directory"; exit 1; }
-        git pull || { echo "Failed to pull zgrab repository"; exit 1; }
-    else
-        git clone https://github.com/zmap/zgrab.git "$GOPATH/src/github.com/zmap/zgrab" || { echo "Failed to clone zgrab repository"; exit 1; }
-        cd "$GOPATH/src/github.com/zmap/zgrab" || { echo "Failed to change directory"; exit 1; }
-    fi
-
-    # Initialize and tidy Go module
-    if [ ! -f "go.mod" ]; then
-        echo "go.mod file not found. Initializing new module."
-        go mod init github.com/zmap/zgrab || { echo "Failed to initialize go module"; exit 1; }
-    fi
 
     # Tidy go modules and build the project
     go mod tidy || { echo "Failed to tidy go modules"; exit 1; }
