@@ -8,12 +8,6 @@ SETUP_SLEEP="1"
 
 # Ensure the Go directory exists
 export GOPATH=/root/go
-mkdir -p /root/go/src/github.com/zmap/zgrab
-go get github.com/zmap/zgrab
-cd /root/go/src/github.com/zmap/zgrab
-go build
-cp ./zgrab /usr/bin/zgrab
-chmod +x /usr/bin/zgrab
 function SETUP_SYSTEM(){
     # Update APK and install necessary packages
     apk update || { echo "APK update failed"; exit 1; }
@@ -25,13 +19,13 @@ function SETUP_SYSTEM(){
         apk add --no-cache "$BASIC_APK_PACK" >/dev/null 2>&1 || { echo "Failed to install $BASIC_APK_PACK"; exit 1; }
         sleep "$SETUP_SLEEP"
     done
-
-    # Tidy go modules and build the project
-    go mod tidy || { echo "Failed to tidy go modules"; exit 1; }
-    go build || { echo "Go build failed"; exit 1; }
-    go install github.com/zmap/zgrab@latest || { echo "Failed to install zgrab"; exit 1; }
-    cp ./zgrab /usr/bin/zgrab || { echo "Failed to copy zgrab"; exit 1; }
-
+    
+    mkdir -p /root/go/src/github.com/zmap/zgrab
+    go get github.com/zmap/zgrab
+    cd /root/go/src/github.com/zmap/zgrab
+    go build
+    cp ./zgrab /usr/bin/zgrab
+    chmod +x /usr/bin/zgrab
     # Clean APK cache
     rm -rf /var/cache/apk/*
 
