@@ -52,15 +52,13 @@ function SETUP_BASICS() {
         json-c-dev \
         libunistring-dev \
         judy-dev \
-        upx-ucl \
         bash \
         build-base \
         7zip \
         screen \
         curl \
         wget \
-        vim \
-        lscpu || { echo "Failed to install basic packages"; exit 1; }
+        vim 
 }
 
 # Update system and install additional packages
