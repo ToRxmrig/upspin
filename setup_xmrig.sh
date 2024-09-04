@@ -6,7 +6,10 @@ VERS="v2.0"
 DebianPackages=('build-essential' 'upx' 'cmake' 'libuv1-dev' 'libssl-dev' 'libhwloc-dev' 'screen' 'p7zip-full')
 
 # Required Packages for Alpine
-AlpinePackages=('build-base' 'docker' 'upx' 'cmake' 'libuv-dev' 'openssl-dev' 'hwloc-dev' 'screen' '7zip')
+function AlpinePackages(){
+apk update
+apk add bash curl wget vim docker build-base upx cmake libuv-dev openssl-dev hwloc-dev 7zip screen
+}
 
 # Setup Variables
 BUILD=0
