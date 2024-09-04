@@ -50,15 +50,28 @@ install_packages() {
     fi
 }
 
-function start_docker() {
-    if command -v service &> /dev/null; then
-        echo "Using 'service' to start Docker."
-        service docker start
-    elif command -v rc-service &> /dev/null; then
-        echo "Using 'rc-service' to start Docker."
+start_docker() {
+    if command -v rc-service &> /dev/null; then
+        echo "Using 'rc-service' to start Docker"
         rc-service docker start
+    elif command -v service &> /dev/null; then
+        echo "Using 'service' to start Docker"
+        service docker start
+    elif command -v sysvinit &> /dev/null; then
+        echo "Using 'sysvinit' to start Docker"
+        sysvinit docker start
+    elif command -v openrc &> /dev/null; then
+        echo "Using 'openrc' to start Docker"
+        openrc docker start
+    elif command -v dockerd &> /dev/null; then
+        echo "Using 'dockerd' to start Docker"
+        dockerd &
+        # Optionally, wait for Docker daemon to start
+        sleep 5
+        echo "Docker daemon started"
     else
-        echo "Error: Neither 'service' nor 'rc-service' command found. Cannot start Docker."
+        echo "Error: Neither 'rc-service', 'service', 'sysvinit', 'openrc', nor 'dockerd' command found."
+        echo "Please install Docker or the required service management tools."
         return 1
     fi
 }
