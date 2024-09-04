@@ -146,4 +146,4 @@ done
 }
 
 
-init_main
+INIT_MAIN
