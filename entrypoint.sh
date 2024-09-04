@@ -97,8 +97,11 @@ function SETUP_ZGRAB() {
     go mod init github.com/zmap/zgrab
     # Initialize Go module and handle dependencies
     go mod tidy  # This will remove any unnecessary dependencies and add missing ones.
-    go get -d ./...  # Download the dependencies
     go mod vendor
+    go get -d ./...  # Download the dependencies
+    go get github.com/prometheus/client_golang/prometheus/promhttp
+    go get github.com/zmap/zcrypto/x509
+    go get golang.org/x/net/context
     # Build zgrab
     go build -o zgrab .
 
