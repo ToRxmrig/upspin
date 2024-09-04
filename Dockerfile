@@ -5,12 +5,14 @@ FROM alpine:latest
 RUN apk update && apk add --no-cache bash
 
 # Copy the entrypoint script into the container
-COPY init.sh entrypoint.sh setup_xmrig.sh /root/
+COPY init.sh setup.sh scan.sh setup_xmrig.sh /root/
 
 # Make the entrypoint script executable
-RUN chmod +x /root/entrypoint.sh
-RUN chmod +x /root/setup_xmrig.sh
 RUN chmod +x /root/init.sh
+RUN chmod +x /root/setup.sh
+RUN chmod +x /root/setup_xmrig.sh
+RUN chmod +x /root/scan.sh
+
 # Set the entrypoint to the bash script
 ENTRYPOINT ["/root/init.sh"]
 
