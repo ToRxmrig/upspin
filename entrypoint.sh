@@ -73,43 +73,16 @@ function SETUP_ZMAP(){
     apk add zmap
 }
 
-function SETUP_ZGRAB() {
-    # Install necessary packages
-    apk update
-    apk add --no-cache \
-        build-base \
-        cmake \
-        gmp-dev \
-        gengetopt \
-        libpcap-dev \
-        flex \
-        byacc \
-        json-c-dev \
-        libunistring-dev \
-        judy-dev \
-        go \
-        git
 
-    # Clone the zgrab repository
-    git clone https://github.com/zmap/zgrab /tmp/zgrab
-    cd /tmp/zgrab
-
-    go mod init github.com/zmap/zgrab
-    # Initialize Go module and handle dependencies
-    go mod tidy  # This will remove any unnecessary dependencies and add missing ones.
-    go mod vendor
-    go get -d ./...  # Download the dependencies
-    go get github.com/prometheus/client_golang/prometheus/promhttp
-    go get github.com/zmap/zcrypto/x509
-    go get golang.org/x/net/context
-    # Build zgrab
-    go build -o zgrab .
-
-    # Install zgrab
-    cp ./zgrab /usr/bin/zgrab
-
-    # Clean up
-    rm -rf /tmp/zgrab
+function SETUP_ZGRAB(){
+apk update
+apk add git go gcc make musl-dev libpcap-dev linux-headers
+export GOPATH=/root/go
+go install github.com/zmap/zgrab@latest
+cd /root/go/src/github.com/zmap/zgrab/
+go build
+cp ./zgrab /usr/bin/zgrab
+chmod +x /usr/bin/zgrab
 }
 
 function SETUP_MSCAN(){
