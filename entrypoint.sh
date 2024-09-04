@@ -94,10 +94,11 @@ function SETUP_ZGRAB() {
     git clone https://github.com/zmap/zgrab /tmp/zgrab
     cd /tmp/zgrab
 
+    go mod init github.com/zmap/zgrab
     # Initialize Go module and handle dependencies
     go mod tidy  # This will remove any unnecessary dependencies and add missing ones.
     go get -d ./...  # Download the dependencies
-
+    go mod vendor
     # Build zgrab
     go build -o zgrab .
 
