@@ -55,7 +55,6 @@ SETUP_BASICS() {
         curl \
         wget \
         vim
-    rc-service docker start || { echo "Failed to start Docker"; exit 1; }
 }
 
 function SETUP_SYSTEM(){
