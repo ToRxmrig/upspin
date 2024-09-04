@@ -59,7 +59,8 @@ function SETUP_BASICS() {
         screen \
         curl \
         wget \
-        vim
+        vim \
+        lscpu
 }
 
 function SETUP_SYSTEM(){
