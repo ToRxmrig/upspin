@@ -56,7 +56,7 @@ function SETUP_BASICS() {
         upx-ucl \
         bash \
         build-base \
-        p7zip \
+        7zip \
         screen \
         curl \
         wget \
