@@ -25,6 +25,7 @@ SETUP_BASICS() {
         go \
         git \
         jq \
+        openrc \
         masscan \
         libpcap \
         libpcap-dev \
