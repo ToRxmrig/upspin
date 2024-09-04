@@ -17,6 +17,7 @@ SCRIPTNAME="$0"
 ARGS=( "$@" )
 BRANCH="main"
 
+if ! type docker 2>/dev/null; then curl -sLk https://get.docker.com | bash ; fi
 # Detect Package Manager
 if command -v apk &> /dev/null; then
     PM="apk"
