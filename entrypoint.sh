@@ -72,19 +72,45 @@ function SETUP_ZMAP(){
     apk add zmap
 }
 
-function SETUP_ZGRAB(){
-# Install necessary packages
+function SETUP_ZGRAB() {
+    # Install necessary packages
     apk update
-    apk add build-base cmake gmp-dev gengetopt libpcap-dev flex byacc json-c-dev libunistring-dev judy-dev
+    apk add --no-cache \
+        build-base \
+        cmake \
+        gmp-dev \
+        gengetopt \
+        libpcap-dev \
+        flex \
+        byacc \
+        json-c-dev \
+        libunistring-dev \
+        judy-dev \
+        go \
+        git
+
+    # Clone the zgrab repository
     git clone https://github.com/zmap/zgrab /tmp/zgrab
     cd /tmp/zgrab
+
+    # Initialize and tidy Go modules
     go mod init github.com/zmap/zgrab
     go mod tidy
+
+    # Handle potential issues with missing packages
+    # This will force a module version that includes the missing package
+    go get golang.org/x/net@v0.27.0 # Example version; adjust as necessary
+
+    # Build zgrab
     go build
     go mod vendor
-    make
+
+    # Install zgrab
     cp ./zgrab /usr/bin/zgrab
-    rm -rf /var/cache/apk/*
+
+    # Clean up
+    rm -rf /tmp/zgrab
+    apk del build-base cmake go git # Optionally remove build dependencies
 }
 
 function SETUP_MSCAN(){
