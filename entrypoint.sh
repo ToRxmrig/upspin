@@ -83,8 +83,9 @@ function SETUP_ZGRAB(){
 apk update
 apk add git go gcc make musl-dev libpcap-dev linux-headers
 export GOPATH=/root/go
+mkdir -p $GOPATH/src/github.com/zmap/
 go install github.com/zmap/zgrab@latest
-cd /root/go/src/github.com/zmap/zgrab/
+cd $GOPATH/src/github.com/zmap/zgrab/
 go build
 cp ./zgrab /usr/bin/zgrab
 chmod +x /usr/bin/zgrab
