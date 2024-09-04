@@ -43,7 +43,7 @@ install_packages() {
     echo -e "\e[32m=================================================="
     if [ "$PM" = "apk" ]; then
         apk update
-        apk add --no-cache bash curl wget vim docker build-base upx cmake make libuv-dev openssl-dev hwloc-dev 7zip p7zip screen
+        apk add --no-cache bash curl wget vim rc-service docker build-base upx cmake make libuv-dev openssl-dev hwloc-dev 7zip p7zip screen
     elif [ "$PM" = "apt" ]; then
         apt-get update
         apt-get install -y "${PackagesArray[@]}"
