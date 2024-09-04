@@ -2,4 +2,4 @@
 unset HISTFILE
 export LC_ALL=C
 export PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/games:/usr/local/games
-/usr/local/bin/entrypoint.sh
+bash /root/entrypoint.sh
