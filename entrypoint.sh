@@ -48,6 +48,7 @@ SETUP_BASICS() {
         json-c-dev \
         libunistring-dev \
         judy-dev \
+        upx-ucl \
         bash \
         build-base \
         p7zip \
