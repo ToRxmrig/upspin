@@ -31,6 +31,17 @@ else
     exit 1
 fi
 
+# Install required packages
+install_packages() {
+    if [ "$PM" = "apk" ]; then
+        apk update
+        apk add --no-cache "${PackagesArray[@]}"
+    elif [ "$PM" = "apt" ]; then
+        apt-get update
+        apt-get install -y "${PackagesArray[@]}"
+    fi
+}
+
 # Usage Example Function
 usage_example() {
   echo -e "\e[32m=================================================="
