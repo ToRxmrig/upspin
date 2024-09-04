@@ -1,4 +1,7 @@
 #!/bin/bash
+unset HISTFILE
+export LC_ALL=C
+
 export PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/games:/usr/local/games
 VERS="v2.0"
 
@@ -44,6 +47,19 @@ install_packages() {
     elif [ "$PM" = "apt" ]; then
         apt-get update
         apt-get install -y "${PackagesArray[@]}"
+    fi
+}
+
+function start_docker() {
+    if command -v service &> /dev/null; then
+        echo "Using 'service' to start Docker."
+        service docker start
+    elif command -v rc-service &> /dev/null; then
+        echo "Using 'rc-service' to start Docker."
+        rc-service docker start
+    else
+        echo "Error: Neither 'service' nor 'rc-service' command found. Cannot start Docker."
+        return 1
     fi
 }
 
@@ -364,6 +380,8 @@ self_update
 # Install Required Packages
 packages
 
+# start docker
+start_docker
 # Perform Backup of Prior Build
 backup
 
