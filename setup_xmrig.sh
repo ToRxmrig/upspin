@@ -6,7 +6,7 @@ VERS="v2.0"
 DebianPackages=('build-essential' 'upx' 'cmake' 'libuv1-dev' 'libssl-dev' 'libhwloc-dev' 'screen' 'p7zip-full')
 
 # Required Packages for Alpine
-AlpinePackages=('build-base' 'upx' 'cmake' 'libuv-dev' 'openssl-dev' 'hwloc-dev' 'screen' 'p7zip')
+AlpinePackages=('build-base' 'docker' 'upx' 'cmake' 'libuv-dev' 'openssl-dev' 'hwloc-dev' 'screen' '7zip')
 
 # Setup Variables
 BUILD=0
