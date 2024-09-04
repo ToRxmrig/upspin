@@ -5,11 +5,6 @@ VERS="v2.0"
 # Required Packages for Debian/Ubuntu
 DebianPackages=('build-essential' 'upx' 'cmake' 'libuv1-dev' 'libssl-dev' 'libhwloc-dev' 'screen' 'p7zip-full')
 
-# Required Packages for Alpine
-function AlpinePackages(){
-apk update
-apk add bash curl wget vim docker build-base upx cmake libuv-dev openssl-dev hwloc-dev 7zip screen
-}
 
 # Setup Variables
 BUILD=0
@@ -43,7 +38,7 @@ install_packages() {
     echo -e "\e[32m=================================================="
     if [ "$PM" = "apk" ]; then
         apk update
-        apk add --no-cache "${PackagesArray[@]}"
+        apk add --no-cache "apk add bash curl wget vim docker build-base upx cmake libuv-dev openssl-dev hwloc-dev 7zip screen"
     elif [ "$PM" = "apt" ]; then
         apt-get update
         apt-get install -y "${PackagesArray[@]}"
