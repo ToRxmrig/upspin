@@ -115,11 +115,7 @@ function SETUP_ZGRAB() {
 
 function SETUP_MSCAN(){
     apk update
-    apk add git gcc make musl-dev libpcap-dev linux-headers
-    git clone https://github.com/robertdavidgraham/masscan /opt/masscan/
-    cd /opt/masscan/ || { echo "Failed to change directory"; exit 1; }
-    make || { echo "Masscan build failed"; exit 1; }
-    make install || { echo "Failed to install masscan"; exit 1; }
+    apk add git gcc make musl-dev libpcap-dev linux-headers masscan
 }
 
 function INFECT_ALL_CONTAINERS(){
