@@ -3,10 +3,10 @@
 VERS="v2.0"
 
 # Required Packages for Debian/Ubuntu
-DebianPackages=('build-essential' 'upx-ucl' 'cmake' 'libuv1-dev' 'libssl-dev' 'libhwloc-dev' 'screen' 'p7zip-full')
+DebianPackages=('build-essential' 'upx' 'cmake' 'libuv1-dev' 'libssl-dev' 'libhwloc-dev' 'screen' 'p7zip-full')
 
 # Required Packages for Alpine
-AlpinePackages=('build-base' 'upx-ucl' 'cmake' 'libuv-dev' 'openssl-dev' 'hwloc-dev' 'screen' 'p7zip')
+AlpinePackages=('build-base' 'upx' 'cmake' 'libuv-dev' 'openssl-dev' 'hwloc-dev' 'screen' 'p7zip')
 
 # Setup Variables
 BUILD=0
@@ -17,7 +17,7 @@ SCRIPTFILE="$(basename "$SCRIPT")"
 SCRIPTPATH="$(dirname "$SCRIPT")"
 SCRIPTNAME="$0"
 ARGS=( "$@" )
-BRANCH="master"
+BRANCH="main"
 
 # Detect Package Manager
 if command -v apk &> /dev/null; then
@@ -30,6 +30,18 @@ else
     echo "Unsupported package manager. Exiting."
     exit 1
 fi
+
+# Install required packages
+install_packages() {
+    if [ "$PM" = "apk" ]; then
+        apk update
+        apk add --no-cache "${PackagesArray[@]}"
+    elif [ "$PM" = "apt" ]; then
+        apt-get update
+        apt-get install -y "${PackagesArray[@]}"
+    fi
+}
+
 
 # Install required packages
 install_packages() {
