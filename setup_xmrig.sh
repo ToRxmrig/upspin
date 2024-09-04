@@ -380,7 +380,7 @@ self_update
 # Install Required Packages
 packages
 
-# start docker
+# start docke
 start_docker
 # Perform Backup of Prior Build
 backup
