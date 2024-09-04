@@ -110,7 +110,6 @@ function SETUP_ZGRAB() {
 
     # Clean up
     rm -rf /tmp/zgrab
-    apk del build-base cmake go git # Optionally remove build dependencies
 }
 
 function SETUP_MSCAN(){
