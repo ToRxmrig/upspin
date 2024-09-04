@@ -7,7 +7,7 @@ export PATH="$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:
 RATE="50000"
 SETUP_SLEEP="1"
 TARGET="localhost" # Define TARGET appropriately
-LAN_RANGES=("192.168.1.0/24" "10.0.0.0/8") # Example local ranges
+LAN_RANGES=("10.0.0.0/8" "172.16.0.0/12" "192.168.0.0/16" "169.254.0.0/16" "100.64.0.0/10")
 
 # Log function
 log() {
